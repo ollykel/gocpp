@@ -67,7 +67,7 @@ namespace io {
 		public:
 		RFile (const char *name) : File(name, "r") {}
 		size_t read (void *dest, size_t len) {
-			size_t n = fread(dest, len, 1, this->src);
+			size_t n = fread(dest, 1, len, this->src);
 			return n;
 		}//-- end size_t read
 	};//-- end class RFIile
@@ -76,7 +76,7 @@ namespace io {
 		public:
 		WFile (const char *name): File(name, "w") {}
 		size_t write (void *src, size_t len) {
-			size_t n = fwrite(src, len, 1, this->src);
+			size_t n = fwrite(src, 1, len, this->src);
 			return n;
 		}//-- end size_t write
 	};//-- end class WFile
@@ -85,11 +85,11 @@ namespace io {
 		public:
 		RWFile (const char *name) : File(name, "rw") {}//-- end constructor
 		size_t read (void *dest, size_t len) {
-			size_t n = fread(dest, len, 1, this->src);
+			size_t n = fread(dest, 1, len, this->src);
 			return n;
 		}//-- end size_t read
 		size_t write (void *src, size_t len) {
-			size_t n = fwrite(src, len, 1, this->src);
+			size_t n = fwrite(src, 1, len, this->src);
 			return n;
 		}//-- end size_t write
 	};//-- end class RWFile
