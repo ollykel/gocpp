@@ -9,90 +9,60 @@
  */
 
 #include <iostream>
-#include <stdio.h>
 
 using namespace std;
 
 namespace io {
 	class Writer {
 		public:
-		virtual size_t write (void *src, size_t len) = 0;//-- end size_t write
+		virtual ssize_t write (const void *src, const size_t len) = 0;//-- end size_t write
 	};//-- enc class Writer
 
 	class WriterTo {
 		public:
-		virtual size_t write_to (Writer& w) = 0;
+		virtual ssize_t write_to (Writer& w) = 0;
 	};//-- end class WriterTo
 
 	class Reader {
 		public:
-		virtual size_t read (void *dest, size_t len) = 0;//-- end size_t read
+		virtual ssize_t read (void *dest, const size_t len) = 0;//-- end size_t read
 	};//-- end class Reader
 
 	class ReaderFrom {
 		public:
-		virtual size_t read_from (Reader& r) = 0;
+		virtual ssize_t read_from (Reader& r) = 0;
 	};//-- end class ReaderFrom
 
 	class Seeker {
 		public:
-		virtual size_t seek (size_t offset, int whence) = 0;
+		virtual ssize_t seek (const size_t offset, const int whence) = 0;
 	};//-- end class Seeker
 
 	class ReadWriter: public Reader, public Writer {};//-- end class ReadWriter
 
-	size_t copy_n (Writer& dst, Reader& src, size_t n) {
-		char *buffer = new char [n];
-		size_t len = src.read(buffer, n);
+	ssize_t copy_n (Writer& dst, Reader& src, const size_t n) {
+		const char *buffer = new char [n];
+		ssize_t len = src.read((void *) buffer, n);
 		len = dst.write(buffer, len);
 		delete[] buffer;
 		return len;
 	}//-- end size_t copy_n
 
-	class File {
+	class Buffer {
 		protected:
-		FILE *src;
-
-		File (const char *name, const char *mode) {
-			this->src = fopen(name, mode);
+		char *buf;
+		size_t len;
+		size_t cap;
+		public:
+		Buffer () {
+			this->cap = 4000;
+			this->buf = new char [this->cap];
+			this->len = 0;
 		}//-- end constructor
-
-		public:
-		~File () {
-			fclose(this->src);
+		~Buffer () {
+			delete[] this->buf;
 		}//-- end destructor
-	};//-- end class File
-
-	class RFile: public File, public Reader {
-		public:
-		RFile (const char *name) : File(name, "r") {}
-		size_t read (void *dest, size_t len) {
-			size_t n = fread(dest, 1, len, this->src);
-			return n;
-		}//-- end size_t read
-	};//-- end class RFIile
-
-	class WFile: public File, public Writer {
-		public:
-		WFile (const char *name): File(name, "w") {}
-		size_t write (void *src, size_t len) {
-			size_t n = fwrite(src, 1, len, this->src);
-			return n;
-		}//-- end size_t write
-	};//-- end class WFile
-
-	class RWFile: public File, public ReadWriter {
-		public:
-		RWFile (const char *name) : File(name, "rw") {}//-- end constructor
-		size_t read (void *dest, size_t len) {
-			size_t n = fread(dest, 1, len, this->src);
-			return n;
-		}//-- end size_t read
-		size_t write (void *src, size_t len) {
-			size_t n = fwrite(src, 1, len, this->src);
-			return n;
-		}//-- end size_t write
-	};//-- end class RWFile
+	};//-- end class Buffer
 };//-- end namespace io
 
 #endif
