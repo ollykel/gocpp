@@ -50,22 +50,39 @@ namespace io {
 
 	class Buffer: public Writer, public WriterTo {
 		protected:
-		char *buf;
-		char *index;
-		size_t len;
+		void *start;
+		void *index;
 		size_t cap;
 		public:
-		Buffer () {
-			this->cap = 4000;
-			this->buf = new char [this->cap];
-			this->len = 0;
+		Buffer (void *dest, size_t len) {
+			this->start = dest;
+			this->index = dest;
+			this->cap = len;
 		}//-- end constructor
 		
-		~Buffer () {
-			delete[] this->buf;
-		}//-- end destructor
+		ssize_t write (const void *src, const size_t len) {
+			const size_t size = len < this->cap ? len : this->cap;
+			memcpy(this->index, src, size);
+			this->index = (char *) this->index + size;
+			this->cap -= size;
+			return size;
+		}//-- end ssize_t write
+
+		ssize_t write_to (Writer& w) {
+			size_t len = ((char *) this->index - (char *) this->start);
+			return w.write(this->start, len);
+		}//-- end ssize_t write_to
+
+		void reset () {
+			this->cap += ((char *) this->index - (char *) this->start);
+			this->index = this->start;
+		}//-- end void reset
 		
-		
+		ssize_t flush (Writer& w) {
+			ssize_t n_written = this->write_to(w);
+			this->reset();
+			return n_written;
+		}//-- end ssize_t flush
 	};//-- end class Buffer
 };//-- end namespace io
 
