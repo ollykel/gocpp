@@ -48,9 +48,10 @@ namespace io {
 		return len;
 	}//-- end size_t copy_n
 
-	class Buffer {
+	class Buffer: public Writer, public WriterTo {
 		protected:
 		char *buf;
+		char *index;
 		size_t len;
 		size_t cap;
 		public:
@@ -59,9 +60,12 @@ namespace io {
 			this->buf = new char [this->cap];
 			this->len = 0;
 		}//-- end constructor
+		
 		~Buffer () {
 			delete[] this->buf;
 		}//-- end destructor
+		
+		
 	};//-- end class Buffer
 };//-- end namespace io
 

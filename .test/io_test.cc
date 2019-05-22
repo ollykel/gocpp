@@ -17,7 +17,7 @@ int main (const int argc, const char **argv) {
 	cerr << "Testing io.hh:\n";
 	os::RFile input = os::RFile(TEST_FILE_A);
 	os::WFile output = os::WFile(TEST_FILE_B);
-	ssize_t n_read = io::copy_n(os::out, input, 10);
+	ssize_t n_read = io::copy_n(os::out, input, 100);
 	cerr << "N read: " << n_read << "\n";
 	input.close();
 	output.close();
