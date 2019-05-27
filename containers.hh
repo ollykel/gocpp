@@ -8,6 +8,7 @@
  */
 
 #include <iostream>
+#include <memory>
 
 using namespace std;
 
@@ -27,19 +28,19 @@ namespace cont {
 		}//-- end const char *what
 	} stack_empty;
 
-	template <class T>
+	template <class T, const size_t mem_size>
 	class Stack {
 		protected:
-		const T *origin;
-		T *head;
+		const T memory[mem_size];
 		const T *limit;
+		T *head;
 		public:
-		Stack (T *src, size_t len): origin(src), limit(src + len) {
-			this->head = src;
+		Stack (): memory(), limit(memory + mem_size) {
+			this->head = (T*) memory;
 		}//-- end constructor
 
 		bool is_empty () {
-			return this->head == this->origin;
+			return this->head == this->memory;
 		}//-- end bool is_empty
 
 		bool is_full() {
@@ -47,7 +48,7 @@ namespace cont {
 		}//-- end bool is_full
 
 		size_t size() {
-			return this->head - this->origin;
+			return this->head - this->memory;
 		}//-- end size_t size
 
 		void push (T item) {
@@ -71,17 +72,16 @@ namespace cont {
 		}//-- end what
 	} alloc_empty;//-- end class AllocEmptyErr
 
-	template <class T>
+	template <class T, const size_t size>
 	class Allocator: public allocator<T> {
 		protected:
-		const T *start;
-		T *curr;
+		const T memory[size];
 		const T *limit;
-		Stack <T*> pool;
+		T *curr;
+		Stack <T*, size> pool;
 		public:
-		Allocator (T *src, T **stack_src, const size_t len) : 
-			start(src), limit(src + len), pool(Stack <T*> (stack_src, len)) {
-			this->curr = src;
+		Allocator () : memory(), limit(memory + size) {
+			this->curr = (T*) memory;
 		}//-- end constructor 1
 
 		T* allocate () {
@@ -91,6 +91,13 @@ namespace cont {
 			if (this->curr == this->limit) throw alloc_empty;
 			T *out = this->curr;
 			this->curr++;
+			return out;
+		}//-- end T* alloc
+
+		T* allocate (size_t len) {
+			if (this->curr + len > this->limit) throw alloc_empty;
+			T *out = this->curr;
+			this->curr += len;
 			return out;
 		}//-- end T* alloc
 
