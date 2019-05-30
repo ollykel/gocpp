@@ -64,6 +64,43 @@ namespace cont {
 		}//-- end T pop
 	};//-- end class Stack
 
+	class AllocFullException: public exception {
+		virtual const char *what () const throw () {
+			return "allocator full";
+		}//-- end what
+	} alloc_full;//-- end class AllocFullException
+
+	template <class T>
+	class PreAllocator {
+		protected:
+		const T *memory;
+		const T *limit;
+		T *head;
+		public:
+		PreAllocator (size_t sz): memory(new T[sz]), limit(memory + sz) {
+			this->head = this->memory;
+		}//-- end constructor 1
+
+		~PreAllocator () {
+			delete this->memory;
+		}//-- end destructor
+
+		size_t capacity () {
+			return this->limit - this->head;
+		}//-- end size_t capacity
+
+		bool is_full () {
+			return this->head == this->limit;
+		}//-- end bool is_full
+
+		T *allocate () {
+			if (this->is_full()) throw alloc_full;
+			T *out = this->head;
+			++this->head;
+			return out;
+		}//-- end T *allocate
+	};//-- end class PreAllocator
+
 };//-- end namespace cont
 
 #endif
